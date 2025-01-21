@@ -7,7 +7,7 @@ from sensor_msgs.msg import NavSatFix, BatteryState
 from geometry_msgs.msg import Twist, Point, Vector3, Quaternion, TransformStamped, Pose
 from tf2_ros import TransformBroadcaster
 from pymavlink import mavutil
-from transforms3d.euler import euler2quat
+from transforms3d.euler import euler2quat, quat2euler
 
 class Macaw(Node):
     """
@@ -326,34 +326,43 @@ class Macaw(Node):
 
     def ros_local_pos_callback(self, ros_msg):
         # command position in NED frame relative to home
-        self.mav.mav.set_position_target_local_ned_send(
-            0, # ms since boot
-            self.sysid, 1,
-            coordinate_frame=mavutil.mavlink.MAV_FRAME_LOCAL_NED,
-            type_mask=( # ignore everything except 3D position and yaw
-                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_X_IGNORE |
-                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_Y_IGNORE |
-                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_Z_IGNORE |
-                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VX_IGNORE |
-                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VY_IGNORE |
-                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VZ_IGNORE |
-                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AX_IGNORE |
-                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AY_IGNORE |
-                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AZ_IGNORE |
-                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_FORCE_SET |
-                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_IGNORE |
-                mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE
-            ),
-            x=ros_msg.position.x, 
-            y=ros_msg.position.y, 
-            z=ros_msg.position.z, # positions in NED
-            vx=0, vy=0, vz=0, # velocities in body NED frame [m/s]
-            afx=0, afy=0, afz=0,
-            yaw=0,
-            yaw_rate=0
-            # accelerations in NED frame [N], yaw, yaw_rate
-            #  (all not supported yet, ignored in GCS Mavlink)
-        )
+        yaw,pitch,roll = quat2euler((ros_msg.orientation.w,
+                                     ros_msg.orientation.x,
+                                     ros_msg.orientation.y,
+                                     ros_msg.orientation.z),'rzyx')
+        if roll**2>1e-9:
+            self.get_logger().info(f'Target roll {roll} too much - ignoring position command')
+        elif pitch**2>1e-9:
+            self.get_logger().info(f'Target pitch {pitch} too much - ignoring position command')
+        else:
+            self.mav.mav.set_position_target_local_ned_send(
+                0, # ms since boot
+                self.sysid, 1,
+                coordinate_frame=mavutil.mavlink.MAV_FRAME_LOCAL_NED,
+                type_mask=( # ignore everything except 3D position and yaw
+                    # mavutil.mavlink.POSITION_TARGET_TYPEMASK_X_IGNORE |
+                    # mavutil.mavlink.POSITION_TARGET_TYPEMASK_Y_IGNORE |
+                    # mavutil.mavlink.POSITION_TARGET_TYPEMASK_Z_IGNORE |
+                    mavutil.mavlink.POSITION_TARGET_TYPEMASK_VX_IGNORE |
+                    mavutil.mavlink.POSITION_TARGET_TYPEMASK_VY_IGNORE |
+                    mavutil.mavlink.POSITION_TARGET_TYPEMASK_VZ_IGNORE |
+                    mavutil.mavlink.POSITION_TARGET_TYPEMASK_AX_IGNORE |
+                    mavutil.mavlink.POSITION_TARGET_TYPEMASK_AY_IGNORE |
+                    mavutil.mavlink.POSITION_TARGET_TYPEMASK_AZ_IGNORE |
+                    # mavutil.mavlink.POSITION_TARGET_TYPEMASK_FORCE_SET |
+                    # mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_IGNORE |
+                    mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE
+                ),
+                x=ros_msg.position.x, 
+                y=ros_msg.position.y, 
+                z=ros_msg.position.z, # positions in NED
+                vx=0, vy=0, vz=0, # velocities in body NED frame [m/s]
+                afx=0, afy=0, afz=0,
+                yaw=yaw,
+                yaw_rate=0
+                # accelerations in NED frame [N], yaw, yaw_rate
+                #  (all not supported yet, ignored in GCS Mavlink)
+            )
 
 
 def main(args=None):
