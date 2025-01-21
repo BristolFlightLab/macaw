@@ -72,6 +72,7 @@ class Macaw(Node):
         self.add_ros_subscriber(Twist, 'cmd_vel', self.ros_body_vel_callback)
         self.add_ros_subscriber(Twist, 'cmd_vel_global', self.ros_global_vel_callback)
         self.add_ros_subscriber(Pose, 'cmd_pose_local', self.ros_local_pos_callback)
+        self.add_ros_subscriber(NavSatFix, 'cmd_pos_global', self.ros_global_pos_callback)
 
     def add_ros_publisher(self, ros_type, topic):
         topic_root = f'macaw/sysid{self.sysid}/'
@@ -291,6 +292,41 @@ class Macaw(Node):
             vz=ros_msg.linear.z, # velocities in NED frame [m/s]
             afx=0, afy=0, afz=0, yaw=0,
             yaw_rate=ros_msg.angular.z
+            # accelerations in NED frame [N], yaw, yaw_rate
+            #  (all not supported yet, ignored in GCS Mavlink)
+        )
+
+    def ros_global_pos_callback(self, ros_msg):
+        # command position in global frame (lat/lon only)
+        sea_level_ellipsoid = self.last_mav_msgs['GPS_RAW_INT'].alt_ellipsoid - self.last_mav_msgs['GPS_RAW_INT'].alt
+        alt_sl_cmd = ros_msg.altitude - sea_level_ellipsoid
+        self.mav.mav.set_position_target_global_int_send(
+            0, # ms since boot
+            self.sysid, 1,
+            coordinate_frame=mavutil.mavlink.MAV_FRAME_GLOBAL_INT,
+            type_mask=( # ignore everything except latitude and longitude, altitude
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_X_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_Y_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_Z_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VX_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VY_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VZ_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AX_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AY_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AZ_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_FORCE_SET |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE
+            ),
+            lat_int=int(1e7*ros_msg.latitude),
+            lon_int=int(1e7*ros_msg.longitude),
+            alt=alt_sl_cmd, # (x, y WGS84 frame pos), z [m]
+            vx=0,
+            vy=0,
+            vz=0, # velocities in NED frame [m/s]
+            afx=0, afy=0, afz=0,
+            yaw=0,
+            yaw_rate=0
             # accelerations in NED frame [N], yaw, yaw_rate
             #  (all not supported yet, ignored in GCS Mavlink)
         )
