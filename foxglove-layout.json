@@ -2,7 +2,7 @@
   "configById": {
     "Gauge!21vlvpa": {
       "path": "/macaw/sysid1/altitude_asl.data",
-      "minValue": -5,
+      "minValue": 0,
       "maxValue": 120,
       "colorMap": "turbo",
       "colorMode": "colormap",
@@ -10,12 +10,12 @@
         "#0000ff",
         "#ff00ff"
       ],
-      "reverse": false,
+      "reverse": true,
       "foxglovePanelTitle": "Alt ASL (m)"
     },
     "Gauge!zqxgzr": {
-      "path": "/macaw/sysid1/altitude_rel_home.data",
-      "minValue": -5,
+      "path": "/macaw/sysid1/altitude_asl.data",
+      "minValue": 0,
       "maxValue": 120,
       "colorMap": "turbo",
       "colorMode": "colormap",
@@ -23,7 +23,7 @@
         "#0000ff",
         "#ff00ff"
       ],
-      "reverse": false,
+      "reverse": true,
       "foxglovePanelTitle": "Alt ASL (m)"
     },
     "RawMessages!14j1fys": {
@@ -63,20 +63,6 @@
       "showFullMessageForDiff": false,
       "topicPath": "/macaw/sysid1/mode.data"
     },
-    "Indicator!t4i0na": {
-      "path": "/macaw/sysid1/is_armed.data",
-      "style": "bulb",
-      "fallbackColor": "#ff0202",
-      "fallbackLabel": "Disarmed",
-      "rules": [
-        {
-          "operator": "=",
-          "rawValue": "true",
-          "color": "#68e24a",
-          "label": "Armed"
-        }
-      ]
-    },
     "Publish!1uvxyxl": {
       "buttonText": "Arm",
       "buttonTooltip": "",
@@ -85,37 +71,7 @@
       "topicName": "/macaw/sysid1/arm",
       "datatype": "std_msgs/msg/Empty"
     },
-    "Publish!17l00vx": {
-      "buttonText": "Take-off",
-      "buttonTooltip": "",
-      "advancedView": false,
-      "value": "{\n  \"data\": 10\n}",
-      "topicName": "/macaw/sysid1/takeoff",
-      "datatype": "std_msgs/msg/Float64"
-    },
-    "Publish!3gx72lq": {
-      "buttonText": "Land",
-      "buttonTooltip": "",
-      "advancedView": false,
-      "value": "{}",
-      "topicName": "/macaw/sysid1/land",
-      "datatype": "std_msgs/msg/Empty"
-    },
-    "RawMessages!4798c8h": {
-      "diffEnabled": false,
-      "diffMethod": "custom",
-      "diffTopicPath": "",
-      "showFullMessageForDiff": false,
-      "topicPath": "/macaw/sysid1/battery_state.voltage"
-    },
-    "RawMessages!43zc3dx": {
-      "diffEnabled": false,
-      "diffMethod": "custom",
-      "diffTopicPath": "",
-      "showFullMessageForDiff": false,
-      "topicPath": "/macaw/sysid1/battery_state.current"
-    },
-    "Gauge!ckj0ox": {
+    "Gauge!3cvx3xd": {
       "path": "/macaw/sysid1/battery_state.percentage",
       "minValue": 0,
       "maxValue": 1,
@@ -127,17 +83,40 @@
       ],
       "reverse": false
     },
-    "RawMessages!4jxgrge": {
+    "Publish!17l00vx": {
+      "buttonText": "Take-off",
+      "buttonTooltip": "",
+      "advancedView": false,
+      "value": "{\n  \"data\": 10\n}",
+      "topicName": "/macaw/sysid1/takeoff",
+      "datatype": "std_msgs/msg/Float64"
+    },
+    "RawMessages!14ph8a7": {
       "diffEnabled": false,
       "diffMethod": "custom",
       "diffTopicPath": "",
       "showFullMessageForDiff": false,
-      "topicPath": "/macaw/sysid1/heartbeat_count.data"
+      "topicPath": "/macaw/sysid1/battery_state.voltage"
+    },
+    "Publish!3gx72lq": {
+      "buttonText": "Land",
+      "buttonTooltip": "",
+      "advancedView": false,
+      "value": "{}",
+      "topicName": "/macaw/sysid1/land",
+      "datatype": "std_msgs/msg/Empty"
+    },
+    "RawMessages!3aqsb55": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/macaw/sysid1/battery_state.current"
     },
     "map!v4cwwl": {
       "center": {
-        "lat": 51.50159104817857,
-        "lon": -2.550756633281708
+        "lat": 51.50137649686737,
+        "lon": -2.5515867769718175
       },
       "customTileUrl": "",
       "disabledTopics": [],
@@ -150,13 +129,13 @@
     "3D!2gu8gho": {
       "cameraState": {
         "perspective": true,
-        "distance": 126.75940887919327,
-        "phi": 86.25922599612363,
-        "thetaOffset": -138.08068482332305,
+        "distance": 61.81739207787424,
+        "phi": 66.73312215605345,
+        "thetaOffset": -23.18711370293832,
         "targetOffset": [
-          -1.4912114538270267,
-          -3.5719041963447005,
-          8.921134552116307e-16
+          -1.9982350762068404,
+          4.2192186796875895,
+          -9.167279739867744e-16
         ],
         "target": [
           0,
@@ -217,6 +196,49 @@
       "imageMode": {},
       "followTf": "home1_enu"
     },
+    "Plot!kb2lq1": {
+      "paths": [
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/macaw/sysid1/altitude_rel_home.data",
+          "enabled": true,
+          "color": "#e3754f"
+        }
+      ],
+      "minYValue": -10,
+      "maxYValue": 150,
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "none",
+      "showPlotValuesInLegend": false,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240,
+      "followingViewWidth": 10,
+      "foxglovePanelTitle": "Alt rel Home"
+    },
+    "Indicator!t4i0na": {
+      "path": "/macaw/sysid1/is_armed.data",
+      "style": "bulb",
+      "fallbackColor": "#ff0202",
+      "fallbackLabel": "Disarmed",
+      "rules": [
+        {
+          "operator": "=",
+          "rawValue": "true",
+          "color": "#68e24a",
+          "label": "Armed"
+        }
+      ]
+    },
+    "RawMessages!4jxgrge": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/macaw/sysid1/heartbeat_count.data"
+    },
     "RosOut!b0toow": {
       "searchTerms": [],
       "minLogLevel": 1
@@ -275,86 +297,88 @@
       "first": {
         "first": {
           "first": {
-            "first": {
-              "first": "Gauge!21vlvpa",
-              "second": "Gauge!zqxgzr",
-              "direction": "row"
-            },
-            "second": {
-              "first": "RawMessages!14j1fys",
-              "second": "RawMessages!y436xg",
-              "direction": "row"
-            },
-            "direction": "column",
-            "splitPercentage": 66.84210526315789
+            "first": "Gauge!21vlvpa",
+            "second": "Gauge!zqxgzr",
+            "direction": "row"
           },
           "second": {
-            "first": "Publish!1vi43kq",
-            "second": {
-              "first": "Publish!1tslxaa",
-              "second": {
-                "first": "RawMessages!755a26",
-                "second": "Indicator!t4i0na",
-                "direction": "row",
-                "splitPercentage": 27.940202162747457
-              },
-              "direction": "row",
-              "splitPercentage": 34.32712110337942
-            },
-            "direction": "row",
-            "splitPercentage": 23.813712438189427
+            "first": "RawMessages!14j1fys",
+            "second": "RawMessages!y436xg",
+            "direction": "row"
           },
           "direction": "column",
-          "splitPercentage": 73.63083164300201
+          "splitPercentage": 62.49971137638827
         },
         "second": {
-          "first": "Publish!1uvxyxl",
+          "first": "Publish!1vi43kq",
           "second": {
-            "first": "Publish!17l00vx",
-            "second": "Publish!3gx72lq",
+            "first": "Publish!1tslxaa",
+            "second": "RawMessages!755a26",
             "direction": "row"
           },
           "direction": "row",
-          "splitPercentage": 33.70760050251257
+          "splitPercentage": 34.01958919741347
         },
         "direction": "column",
-        "splitPercentage": 75.15243902439025
+        "splitPercentage": 66.5841584158416
       },
       "second": {
         "first": {
-          "first": "RawMessages!4798c8h",
-          "second": "RawMessages!43zc3dx",
+          "first": "Publish!1uvxyxl",
+          "second": "Gauge!3cvx3xd",
           "direction": "column"
         },
         "second": {
-          "first": "Gauge!ckj0ox",
-          "second": "RawMessages!4jxgrge",
+          "first": {
+            "first": "Publish!17l00vx",
+            "second": "RawMessages!14ph8a7",
+            "direction": "column"
+          },
+          "second": {
+            "first": "Publish!3gx72lq",
+            "second": "RawMessages!3aqsb55",
+            "direction": "column"
+          },
           "direction": "row"
         },
         "direction": "row",
-        "splitPercentage": 33.5943443324458
+        "splitPercentage": 33.70760050251257
       },
       "direction": "column",
-      "splitPercentage": 74.71526195899773
+      "splitPercentage": 62.89954337899544
     },
     "second": {
       "direction": "row",
       "first": {
-        "first": "map!v4cwwl",
-        "second": "3D!2gu8gho",
-        "direction": "column"
+        "first": {
+          "first": "map!v4cwwl",
+          "second": "3D!2gu8gho",
+          "direction": "column"
+        },
+        "second": "Plot!kb2lq1",
+        "direction": "row",
+        "splitPercentage": 76.58403313109018
       },
       "second": {
-        "first": "RosOut!b0toow",
+        "first": {
+          "first": {
+            "first": "Indicator!t4i0na",
+            "second": "RawMessages!4jxgrge",
+            "direction": "row",
+            "splitPercentage": 64.67835004494205
+          },
+          "second": "RosOut!b0toow",
+          "direction": "column",
+          "splitPercentage": 27.85388127853881
+        },
         "second": {
           "first": "Teleop!pm7tci",
           "second": "Teleop!1dmnmxz",
           "direction": "row"
         },
-        "direction": "column",
-        "splitPercentage": 70.84282460136674
+        "direction": "column"
       },
-      "splitPercentage": 56.994699105401324
+      "splitPercentage": 56.578518774163285
     },
     "splitPercentage": 24.598183088749124
   }
