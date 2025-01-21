@@ -115,8 +115,8 @@
     },
     "map!v4cwwl": {
       "center": {
-        "lat": 51.50137649686737,
-        "lon": -2.5515867769718175
+        "lat": 51.501735473200554,
+        "lon": -2.5519810616970062
       },
       "customTileUrl": "",
       "disabledTopics": [],
@@ -129,13 +129,13 @@
     "3D!2gu8gho": {
       "cameraState": {
         "perspective": true,
-        "distance": 61.81739207787424,
-        "phi": 66.73312215605345,
-        "thetaOffset": -23.18711370293832,
+        "distance": 35.161738318178145,
+        "phi": 50.294060310579525,
+        "thetaOffset": -32.01064351513156,
         "targetOffset": [
-          -1.9982350762068404,
-          4.2192186796875895,
-          -9.167279739867744e-16
+          0.41383136240790086,
+          11.326976847299186,
+          1.899690344662263e-16
         ],
         "target": [
           0,
@@ -155,7 +155,10 @@
       "followMode": "follow-pose",
       "scene": {
         "backgroundColor": "#523c3c",
-        "meshUpAxis": "y_up"
+        "meshUpAxis": "y_up",
+        "transforms": {
+          "axisScale": 10
+        }
       },
       "transforms": {},
       "topics": {},
@@ -283,6 +286,27 @@
         "field": "linear-y",
         "value": 2
       },
+      "foxglovePanelTitle": "Forward/Right"
+    },
+    "Teleop!2ujsjf": {
+      "topic": "/macaw/sysid1/cmd_vel_global",
+      "publishRate": 1,
+      "upButton": {
+        "field": "linear-x",
+        "value": 2
+      },
+      "downButton": {
+        "field": "linear-x",
+        "value": -2
+      },
+      "leftButton": {
+        "field": "linear-y",
+        "value": -2
+      },
+      "rightButton": {
+        "field": "linear-y",
+        "value": 2
+      },
       "foxglovePanelTitle": "North/East"
     }
   },
@@ -373,8 +397,13 @@
         },
         "second": {
           "first": "Teleop!pm7tci",
-          "second": "Teleop!1dmnmxz",
-          "direction": "row"
+          "second": {
+            "first": "Teleop!1dmnmxz",
+            "second": "Teleop!2ujsjf",
+            "direction": "row"
+          },
+          "direction": "row",
+          "splitPercentage": 32.083741390659334
         },
         "direction": "column"
       },

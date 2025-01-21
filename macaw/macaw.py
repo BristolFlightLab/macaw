@@ -4,7 +4,7 @@ from rclpy.parameter import Parameter
 from rclpy.exceptions import ParameterNotDeclaredException
 from std_msgs.msg import Empty, Bool, UInt8, Float64, String, UInt64
 from sensor_msgs.msg import NavSatFix, BatteryState
-from geometry_msgs.msg import Twist, Point, Vector3, Quaternion, TransformStamped
+from geometry_msgs.msg import Twist, Point, Vector3, Quaternion, TransformStamped, Pose
 from tf2_ros import TransformBroadcaster
 from pymavlink import mavutil
 from transforms3d.euler import euler2quat
@@ -69,7 +69,9 @@ class Macaw(Node):
         self.add_ros_subscriber(Float64, 'takeoff', self.ros_takeoff_callback)
         self.add_ros_subscriber(Empty, 'land', self.ros_land_callback)
         self.add_ros_subscriber(String, 'cmd_mode', self.ros_mode_callback)
-        self.add_ros_subscriber(Twist, 'cmd_vel', self.ros_vel_callback)
+        self.add_ros_subscriber(Twist, 'cmd_vel', self.ros_body_vel_callback)
+        self.add_ros_subscriber(Twist, 'cmd_vel_global', self.ros_global_vel_callback)
+        self.add_ros_subscriber(Pose, 'cmd_pose_local', self.ros_local_pos_callback)
 
     def add_ros_publisher(self, ros_type, topic):
         topic_root = f'macaw/sysid{self.sysid}/'
@@ -264,12 +266,13 @@ class Macaw(Node):
         else:
             self.get_logger().info(f'Unknown mode {new_mode_name}')
 
-    def ros_vel_callback(self, ros_msg):
+    def ros_global_vel_callback(self, ros_msg):
+        # command velocity in global aligned frame
         self.mav.mav.set_position_target_global_int_send(
             0, # ms since boot
             self.sysid, 1,
             coordinate_frame=mavutil.mavlink.MAV_FRAME_GLOBAL_INT,
-            type_mask=( # ignore everything except z position
+            type_mask=( # ignore everything except 3D velocity and yaw rate
                 mavutil.mavlink.POSITION_TARGET_TYPEMASK_X_IGNORE |
                 mavutil.mavlink.POSITION_TARGET_TYPEMASK_Y_IGNORE |
                 mavutil.mavlink.POSITION_TARGET_TYPEMASK_Z_IGNORE |
@@ -291,6 +294,67 @@ class Macaw(Node):
             # accelerations in NED frame [N], yaw, yaw_rate
             #  (all not supported yet, ignored in GCS Mavlink)
         )
+
+    def ros_body_vel_callback(self, ros_msg):
+        # command velocity in body aligned frame
+        self.mav.mav.set_position_target_local_ned_send(
+            0, # ms since boot
+            self.sysid, 1,
+            coordinate_frame=mavutil.mavlink.MAV_FRAME_BODY_NED,
+            type_mask=( # ignore everything except 3D velocity and yaw rate
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_X_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_Y_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_Z_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_VX_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_VY_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_VZ_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AX_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AY_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AZ_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_FORCE_SET |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_IGNORE #|
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE
+            ), x=0, y=0, z=0, # 
+            vx=ros_msg.linear.x,
+            vy=ros_msg.linear.y,
+            vz=ros_msg.linear.z, # velocities in body NED frame [m/s]
+            afx=0, afy=0, afz=0, yaw=0,
+            yaw_rate=ros_msg.angular.z
+            # accelerations in NED frame [N], yaw, yaw_rate
+            #  (all not supported yet, ignored in GCS Mavlink)
+        )
+
+    def ros_local_pos_callback(self, ros_msg):
+        # command position in NED frame relative to home
+        self.mav.mav.set_position_target_local_ned_send(
+            0, # ms since boot
+            self.sysid, 1,
+            coordinate_frame=mavutil.mavlink.MAV_FRAME_LOCAL_NED,
+            type_mask=( # ignore everything except 3D position and yaw
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_X_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_Y_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_Z_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VX_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VY_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_VZ_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AX_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AY_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_AZ_IGNORE |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_FORCE_SET |
+                # mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_IGNORE |
+                mavutil.mavlink.POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE
+            ),
+            x=ros_msg.position.x, 
+            y=ros_msg.position.y, 
+            z=ros_msg.position.z, # positions in NED
+            vx=0, vy=0, vz=0, # velocities in body NED frame [m/s]
+            afx=0, afy=0, afz=0,
+            yaw=0,
+            yaw_rate=0
+            # accelerations in NED frame [N], yaw, yaw_rate
+            #  (all not supported yet, ignored in GCS Mavlink)
+        )
+
 
 def main(args=None):
     rclpy.init(args=args)
