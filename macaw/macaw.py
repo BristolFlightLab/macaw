@@ -35,6 +35,7 @@ class Macaw(Node):
         self.add_ros_publisher(Float64, 'altitude_asl')
         self.add_ros_publisher(Float64, 'altitude_rel_home')
         self.add_ros_publisher(Point, 'local_position')
+        self.add_ros_publisher(Point, 'local_target')
         self.add_ros_publisher(Vector3, 'local_velocity')
         self.add_ros_publisher(Quaternion, 'attitude')
         self.add_ros_publisher(Vector3, 'angular_velocity')
@@ -64,6 +65,7 @@ class Macaw(Node):
         self.add_mav_subscriber('SYS_STATUS', self.mav_sys_status_callback, interval=1e6)
         self.add_mav_subscriber('GLOBAL_POSITION_INT', self.mav_global_pos_callback, interval=1e6)
         self.add_mav_subscriber('POSITION_TARGET_GLOBAL_INT', self.mav_global_target_callback, interval=1e6)
+        self.add_mav_subscriber('POSITION_TARGET_LOCAL_NED', self.mav_local_target_callback, interval=1e6)
         self.get_logger().info(f'Ready for MAVlink messages: {self.mav_subscribers.keys()}')
         # timer for inbound MAVlink handling
         timer_period = 0.001  # seconds
@@ -156,9 +158,6 @@ class Macaw(Node):
         ros_msg.longitude = mav_msg.lon/1e7
         ros_msg.altitude = mav_msg.alt_ellipsoid/1e3
         self.ros_publishers['gps_raw'].publish(ros_msg)
-        ros_msg = Float64()
-        ros_msg.data = mav_msg.alt/1e3
-        self.ros_publishers['altitude_asl'].publish(ros_msg)
 
     def mav_global_pos_callback(self, mav_msg):
         ros_msg = NavSatFix()
@@ -166,6 +165,12 @@ class Macaw(Node):
         ros_msg.longitude = mav_msg.lon/1e7
         ros_msg.altitude = -1.0 # no altitude as WGS84 not provided in this MAVLINK message
         self.ros_publishers['global_pos'].publish(ros_msg)
+        ros_msg = Float64()
+        ros_msg.data = mav_msg.alt/1e3
+        self.ros_publishers['altitude_asl'].publish(ros_msg)
+        ros_msg = Float64()
+        ros_msg.data = mav_msg.relative_alt/1e3
+        self.ros_publishers['altitude_rel_home'].publish(ros_msg)
 
     def mav_global_target_callback(self, mav_msg):
         ros_msg = NavSatFix()
@@ -198,10 +203,28 @@ class Macaw(Node):
         ros_msg.y = mav_msg.vy
         ros_msg.z = mav_msg.vz
         self.ros_publishers['local_velocity'].publish(ros_msg)
-        ros_msg = Float64()
-        ros_msg.data = -mav_msg.z
-        self.ros_publishers['altitude_rel_home'].publish(ros_msg)
         self.mav_tf_callback()
+
+    def mav_local_target_callback(self, mav_msg):
+        ros_msg = Point()
+        ros_msg.x = mav_msg.x
+        ros_msg.y = mav_msg.y
+        ros_msg.z = mav_msg.z
+        self.ros_publishers['local_target'].publish(ros_msg)
+        t = TransformStamped()
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = f'home{self.sysid}_ned'
+        t.child_frame_id = f'target{self.sysid}_ned'
+        t.transform.translation.x = mav_msg.x
+        t.transform.translation.y = mav_msg.y
+        t.transform.translation.z = mav_msg.z
+        q = euler2quat(mav_msg.yaw, 0.0, 0.0, 'rzyx')
+        t.transform.rotation.x = q[1]
+        t.transform.rotation.y = q[2]
+        t.transform.rotation.z = q[3]
+        t.transform.rotation.w = q[0]
+        self.get_logger().debug('Sending target TF')
+        self.tf_broadcaster.sendTransform(t)
 
     def mav_attitude_callback(self, mav_msg):
         """The attitude in the aeronautical frame
