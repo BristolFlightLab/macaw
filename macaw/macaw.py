@@ -29,7 +29,9 @@ class Macaw(Node):
         self.add_ros_publisher(UInt8, 'mode')
         self.add_ros_publisher(UInt64, 'heartbeat_count')
         self.add_ros_publisher(Bool, 'is_armed')
-        self.add_ros_publisher(NavSatFix, 'gps')
+        self.add_ros_publisher(NavSatFix, 'gps_raw')
+        self.add_ros_publisher(NavSatFix, 'global_pos')
+        self.add_ros_publisher(NavSatFix, 'global_target')
         self.add_ros_publisher(Float64, 'altitude_asl')
         self.add_ros_publisher(Float64, 'altitude_rel_home')
         self.add_ros_publisher(Point, 'local_position')
@@ -60,6 +62,8 @@ class Macaw(Node):
         self.add_mav_subscriber('ATTITUDE', self.mav_attitude_callback, interval=1e6)
         self.add_mav_subscriber('COMMAND_ACK', self.mav_cmd_ack_callback)
         self.add_mav_subscriber('SYS_STATUS', self.mav_sys_status_callback, interval=1e6)
+        self.add_mav_subscriber('GLOBAL_POSITION_INT', self.mav_global_pos_callback, interval=1e6)
+        self.add_mav_subscriber('POSITION_TARGET_GLOBAL_INT', self.mav_global_target_callback, interval=1e6)
         self.get_logger().info(f'Ready for MAVlink messages: {self.mav_subscribers.keys()}')
         # timer for inbound MAVlink handling
         timer_period = 0.001  # seconds
@@ -109,12 +113,12 @@ class Macaw(Node):
             mav_msg_type = mav_msg.get_type()
             mav_msg_sender = mav_msg.get_srcSystem()
             if mav_msg_type in self.mav_subscribers:
-                self.get_logger().info(f'Got {mav_msg_type} from {mav_msg_sender}')
+                self.get_logger().debug(f'Got {mav_msg_type} from {mav_msg_sender}')
                 self.last_mav_msgs[mav_msg_type] = mav_msg
                 if mav_msg_sender == self.sysid:
                     self.mav_subscribers[mav_msg_type](mav_msg)
             else:
-                self.get_logger().info(f'Ignoring {mav_msg_type} from {mav_msg_sender}')
+                self.get_logger().debug(f'Ignoring {mav_msg_type} from {mav_msg_sender}')
 
     def mav_heartbeat_callback(self, mav_msg):
         # status
@@ -151,10 +155,24 @@ class Macaw(Node):
         ros_msg.latitude = mav_msg.lat/1e7
         ros_msg.longitude = mav_msg.lon/1e7
         ros_msg.altitude = mav_msg.alt_ellipsoid/1e3
-        self.ros_publishers['gps'].publish(ros_msg)
+        self.ros_publishers['gps_raw'].publish(ros_msg)
         ros_msg = Float64()
         ros_msg.data = mav_msg.alt/1e3
         self.ros_publishers['altitude_asl'].publish(ros_msg)
+
+    def mav_global_pos_callback(self, mav_msg):
+        ros_msg = NavSatFix()
+        ros_msg.latitude = mav_msg.lat/1e7
+        ros_msg.longitude = mav_msg.lon/1e7
+        ros_msg.altitude = -1.0 # no altitude as WGS84 not provided in this MAVLINK message
+        self.ros_publishers['global_pos'].publish(ros_msg)
+
+    def mav_global_target_callback(self, mav_msg):
+        ros_msg = NavSatFix()
+        ros_msg.latitude = mav_msg.lat_int/1e7
+        ros_msg.longitude = mav_msg.lon_int/1e7
+        ros_msg.altitude = -1.0 # no altitude as WGS84 not provided in this MAVLINK message
+        self.ros_publishers['global_target'].publish(ros_msg)
 
     def mav_param_callback(self, mav_msg):
         param_name = f'macaw/sysid{self.sysid}/{mav_msg.param_id}'
@@ -222,7 +240,7 @@ class Macaw(Node):
             t.transform.rotation.y = q[2]
             t.transform.rotation.z = q[3]
             t.transform.rotation.w = q[0]
-            self.get_logger().info('Sending TF')
+            self.get_logger().debug('Sending TF')
             self.tf_broadcaster.sendTransform(t)
 
     def mav_sys_status_callback(self, mav_msg):

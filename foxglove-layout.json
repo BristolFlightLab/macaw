@@ -115,16 +115,22 @@
     },
     "map!v4cwwl": {
       "center": {
-        "lat": 51.50158353472559,
-        "lon": -2.55183219909668
+        "lat": 51.501289674259795,
+        "lon": -2.547494876321881
       },
       "customTileUrl": "",
-      "disabledTopics": [],
+      "disabledTopics": [
+        "/macaw/sysid1/target_pos"
+      ],
       "followTopic": "/macaw/sysid1/gps",
       "layer": "satellite",
       "topicColors": {
-        "/macaw/sysid1/cmd_pos_global": "#1ffa04",
-        "/macaw/sysid1/gps": "#fd0606"
+        "/macaw/sysid1/cmd_pos_global": "#ae00ff",
+        "/macaw/sysid1/gps": "#fd0606",
+        "/macaw/sysid1/gps_raw": "#ffff00",
+        "/macaw/sysid1/target_pos": "#3cfa0b",
+        "/macaw/sysid1/global_pos": "#fd0c04",
+        "/macaw/sysid1/global_target": "#00ff15"
       },
       "maxNativeZoom": 18,
       "zoomLevel": 19
@@ -263,7 +269,7 @@
     },
     "RosOut!b0toow": {
       "searchTerms": [],
-      "minLogLevel": 1
+      "minLogLevel": 2
     },
     "Teleop!pm7tci": {
       "topic": "/macaw/sysid1/cmd_vel",
