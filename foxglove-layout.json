@@ -1,18 +1,5 @@
 {
   "configById": {
-    "Gauge!21vlvpa": {
-      "path": "/macaw/sysid1/altitude_asl.data",
-      "minValue": 0,
-      "maxValue": 120,
-      "colorMap": "turbo",
-      "colorMode": "colormap",
-      "gradient": [
-        "#0000ff",
-        "#ff00ff"
-      ],
-      "reverse": true,
-      "foxglovePanelTitle": "Alt ASL (m)"
-    },
     "Gauge!zqxgzr": {
       "path": "/macaw/sysid1/altitude_asl.data",
       "minValue": 0,
@@ -113,16 +100,23 @@
       "showFullMessageForDiff": false,
       "topicPath": "/macaw/sysid1/battery_state.current"
     },
+    "RawMessages!404arv8": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/macaw/sysid1/heading.data"
+    },
     "map!v4cwwl": {
       "center": {
-        "lat": 51.501289674259795,
-        "lon": -2.547494876321881
+        "lat": 51.50158353472559,
+        "lon": -2.551810741424561
       },
       "customTileUrl": "",
       "disabledTopics": [
         "/macaw/sysid1/target_pos"
       ],
-      "followTopic": "/macaw/sysid1/gps",
+      "followTopic": "/macaw/sysid1/global_pos",
       "layer": "satellite",
       "topicColors": {
         "/macaw/sysid1/cmd_pos_global": "#ae00ff",
@@ -139,20 +133,20 @@
       "buttonText": "Publish",
       "buttonTooltip": "",
       "advancedView": true,
-      "value": "{\n  \"header\": {\n    \"stamp\": {\n      \"sec\": 0,\n      \"nsec\": 0\n    },\n    \"frame_id\": \"\"\n  },\n  \"status\": {\n    \"status\": 0,\n    \"service\": 0\n  },\n  \"latitude\": 51.5,\n  \"longitude\": -2.54,\n  \"altitude\": 20,\n  \"position_covariance\": [\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0\n  ],\n  \"position_covariance_type\": 0\n}",
+      "value": "{\n  \"header\": {\n    \"stamp\": {\n      \"sec\": 0,\n      \"nsec\": 0\n    },\n    \"frame_id\": \"\"\n  },\n  \"status\": {\n    \"status\": 0,\n    \"service\": 0\n  },\n  \"latitude\": 51.502,\n  \"longitude\": -2.552,\n  \"altitude\": 20,\n  \"position_covariance\": [\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0\n  ],\n  \"position_covariance_type\": 0\n}",
       "topicName": "/macaw/sysid1/cmd_pos_global",
       "datatype": "sensor_msgs/msg/NavSatFix"
     },
     "3D!2gu8gho": {
       "cameraState": {
         "perspective": true,
-        "distance": 75.89554049199094,
-        "phi": 47.6470014870488,
-        "thetaOffset": -2.0106435151324114,
+        "distance": 98.08401423946263,
+        "phi": 30.88229560469412,
+        "thetaOffset": -37.30476116219354,
         "targetOffset": [
-          0.41383136240790086,
-          11.326976847299186,
-          1.899690344662263e-16
+          -2.3297673120085456,
+          8.179953520047421,
+          -1.3157685187244484e-16
         ],
         "target": [
           0,
@@ -345,18 +339,14 @@
     "first": {
       "first": {
         "first": {
-          "first": {
-            "first": "Gauge!21vlvpa",
-            "second": "Gauge!zqxgzr",
-            "direction": "row"
-          },
+          "first": "Gauge!zqxgzr",
           "second": {
             "first": "RawMessages!14j1fys",
             "second": "RawMessages!y436xg",
-            "direction": "row"
+            "direction": "column"
           },
-          "direction": "column",
-          "splitPercentage": 62.49971137638827
+          "direction": "row",
+          "splitPercentage": 58.25854650057056
         },
         "second": {
           "first": "Publish!1vi43kq",
@@ -401,10 +391,15 @@
       "first": {
         "first": {
           "first": {
-            "first": "map!v4cwwl",
+            "first": {
+              "first": "RawMessages!404arv8",
+              "second": "map!v4cwwl",
+              "direction": "column",
+              "splitPercentage": 22.146118721461185
+            },
             "second": "Publish!3t4z5br",
             "direction": "row",
-            "splitPercentage": 70.44800042439356
+            "splitPercentage": 77.36154160951246
           },
           "second": {
             "first": "3D!2gu8gho",
@@ -412,7 +407,8 @@
             "direction": "row",
             "splitPercentage": 77.36154160951246
           },
-          "direction": "column"
+          "direction": "column",
+          "splitPercentage": 57.76255707762557
         },
         "second": "Plot!kb2lq1",
         "direction": "row",
@@ -428,7 +424,7 @@
           },
           "second": "RosOut!b0toow",
           "direction": "column",
-          "splitPercentage": 27.85388127853881
+          "splitPercentage": 17.948717948717945
         },
         "second": {
           "first": "Teleop!pm7tci",
@@ -441,7 +437,7 @@
           "splitPercentage": 32.083741390659334
         },
         "direction": "column",
-        "splitPercentage": 69.74885844748859
+        "splitPercentage": 75.68493150684932
       },
       "splitPercentage": 64.20849151352755
     },

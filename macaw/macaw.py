@@ -34,6 +34,7 @@ class Macaw(Node):
         self.add_ros_publisher(NavSatFix, 'global_target')
         self.add_ros_publisher(Float64, 'altitude_asl')
         self.add_ros_publisher(Float64, 'altitude_rel_home')
+        self.add_ros_publisher(Float64, 'heading')
         self.add_ros_publisher(Point, 'local_position')
         self.add_ros_publisher(Point, 'local_target')
         self.add_ros_publisher(Vector3, 'local_velocity')
@@ -171,6 +172,9 @@ class Macaw(Node):
         ros_msg = Float64()
         ros_msg.data = mav_msg.relative_alt/1e3
         self.ros_publishers['altitude_rel_home'].publish(ros_msg)
+        ros_msg = Float64()
+        ros_msg.data = mav_msg.hdg/1e2
+        self.ros_publishers['heading'].publish(ros_msg)
 
     def mav_global_target_callback(self, mav_msg):
         ros_msg = NavSatFix()
