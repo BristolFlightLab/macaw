@@ -88,6 +88,13 @@ class Macaw(Node):
                                         10)
         self.ros_publishers[topic] = new_pub
 
+    def publish_ros(self,topic,msg,msg_type=None):
+        if topic not in self.ros_publishers:
+            if msg_type==None:
+                msg_type = type(msg)
+            self.add_ros_publisher(msg_type, topic)
+        self.ros_publishers[topic].publish(msg)
+
     def add_ros_subscriber(self, ros_type, topic, callback):
         topic_root = f'macaw/sysid{self.sysid}/'
         new_sub = self.create_subscription(ros_type,
@@ -207,6 +214,9 @@ class Macaw(Node):
         ros_msg.y = mav_msg.vy
         ros_msg.z = mav_msg.vz
         self.ros_publishers['local_velocity'].publish(ros_msg)
+        ros_msg = Float64()
+        ros_msg.data = mav_msg.vz*(-0.3048)*60
+        self.publish_ros('vertical_speed_fpm',ros_msg)
         self.mav_tf_callback()
 
     def mav_local_target_callback(self, mav_msg):
