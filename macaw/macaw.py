@@ -54,6 +54,8 @@ class Macaw(Node):
         self.mav.wait_heartbeat()
         self.num_heartbeats = 1
         self.get_logger().info(f'Got heartbeat from ID {self.mav.target_system} component {self.mav.target_component}')
+        # reverse mode lookup
+        self.reverse_mode_lookup = dict([(self.mav.mode_mapping()[name],name) for name in self.mav.mode_mapping()])
         # set up inbound MAVlink subscribers
         self.mav_subscribers = {}
         self.last_mav_msgs = {}
@@ -147,6 +149,10 @@ class Macaw(Node):
         ros_msg = UInt8()
         ros_msg.data = mav_msg.custom_mode
         self.ros_publishers['mode'].publish(ros_msg)
+        # mode name
+        ros_msg = String()
+        ros_msg.data = self.reverse_mode_lookup[mav_msg.custom_mode]
+        self.publish_ros('mode_name', ros_msg)
         # time stamp
         self.num_heartbeats = self.num_heartbeats + 1
         ros_msg = UInt64()
