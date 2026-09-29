@@ -48,7 +48,8 @@ class Macaw(Node):
         self.get_logger().info(f'Connecting to {connect_str.value}')
         self.mav = mavutil.mavlink_connection(connect_str.value, 
                                               source_system=253,
-                                              source_component=mavutil.mavlink.MAV_COMP_ID_ONBOARD_COMPUTER)
+                                              source_component=mavutil.mavlink.MAV_COMP_ID_ONBOARD_COMPUTER,
+                                              retries=5000)
         self.get_logger().info(f'Waiting for heartbeat')
         self.mav.wait_heartbeat()
         self.num_heartbeats = 1
