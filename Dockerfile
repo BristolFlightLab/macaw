@@ -24,7 +24,7 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
 
 RUN echo '#!/bin/bash' > /macaw_entrypoint.sh \
     && echo '. /ros_ws/install/setup.sh' >> /macaw_entrypoint.sh \
-    && echo 'export SITL_IP=$(getent ahostsv4 copter | grep -o -m 1 "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*")' >> /macaw_entrypoint.sh \
+    && echo 'export SITL_IP=$(getent ahostsv4 $SITL_HOSTNAME | grep -o -m 1 "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*")' >> /macaw_entrypoint.sh \
     && echo 'echo $SITL_HOSTNAME' >> /macaw_entrypoint.sh \
     && echo 'echo $SITL_IP' >> /macaw_entrypoint.sh \
     && echo 'exec "$@"' >> /macaw_entrypoint.sh \

@@ -1,0 +1,39 @@
+services:
+
+  copter1:
+    entrypoint: /ardupilot/build/sitl/bin/arducopter -w --model=quad --home=51.501592,-2.551791,0,180
+      --defaults /ardupilot/Tools/autotest/default_params/copter.parm --sysid=1
+    image: murphy360/ardupilot-sitl-copter
+    ports:
+      - 5762:5762
+
+  macaw1:
+    build: .
+    depends_on:
+    - copter1
+    environment:
+      - SITL_HOSTNAME=copter1
+    command: ros2 launch macaw macaw.launch.xml
+
+  copter2:
+    entrypoint: /ardupilot/build/sitl/bin/arducopter -w --model=quad --home=51.501592,-2.551891,0,180
+      --defaults /ardupilot/Tools/autotest/default_params/copter.parm --sysid=2
+    image: murphy360/ardupilot-sitl-copter
+    ports:
+      - 5772:5762
+
+  macaw2:
+    build: .
+    depends_on:
+    - copter2
+    environment:
+      - SITL_HOSTNAME=copter2
+    command: ros2 launch macaw macaw.launch.xml sysid:=2
+
+  rosbridge:
+    image: husarion/rosbridge-server:humble
+    ports:
+      - 9090:9090
+    command: ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+
+version: '3.8'
