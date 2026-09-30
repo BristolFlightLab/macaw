@@ -5,6 +5,7 @@ services:
       --defaults /ardupilot/Tools/autotest/default_params/copter.parm --sysid=1
     image: murphy360/ardupilot-sitl-copter
     ports:
+      - 5760:5760
       - 5762:5762
 
   macaw:
@@ -13,7 +14,7 @@ services:
     - copter
     environment:
       SITL_HOSTNAME: copter
-    command: ros2 launch macaw macaw.launch.xml
+    command: ros2 launch macaw macaw.launch.xml connect_str:=tcp:172.18.0.1:5760
 
   rosbridge:
     image: husarion/rosbridge-server:humble
